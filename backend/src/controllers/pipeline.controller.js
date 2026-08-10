@@ -124,6 +124,13 @@ export async function generateNotesController(req, res) {
     const format = req.body.format || 'pdf';
     const userDoc = await UserModel.findOne({ email: email });
 
+    if (!userDoc) {
+      return res.status(404).json({
+        success: false,
+        error: 'User account not found. Please log in again.',
+      });
+    }
+
     // Store request in database
     const request = await NotesRequestModel.create({
       _userID: userDoc._id,
