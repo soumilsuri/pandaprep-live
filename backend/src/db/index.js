@@ -1,14 +1,29 @@
 import mongoose from "mongoose";
 
-const connectDB = async () => {
-    try {
-        // console.log(process.env.MONGODB_URI)
-        const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}`)
-        console.log(`\n MongoDB connected !! DB HOST: ${connectionInstance.connection.host}`);
-    } catch (error) {
-        console.log("MONGODB connection FAILED ", error);
-        process.exit(1)
-    }
-}
+let connectionPromise = null;
 
-export default connectDB
+const connectDB = async () => {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI is not configured');
+  }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(process.env.MONGODB_URI)
+      .then((connectionInstance) => {
+        console.log(`\nMongoDB connected: ${connectionInstance.connection.host}`);
+        return connectionInstance;
+      })
+      .catch((error) => {
+        connectionPromise = null;
+        throw error;
+      });
+  }
+
+  return connectionPromise;
+};
+
+export default connectDB;
