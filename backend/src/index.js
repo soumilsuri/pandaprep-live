@@ -7,6 +7,11 @@ dotenv.config({
 });
 
 /**
+ * Configures maximum serverless execution duration for Vercel functions (in seconds).
+ */
+export const maxDuration = 60;
+
+/**
  * Vercel invokes this handler per request. A serverless function must not open
  * its own long-lived HTTP listener with app.listen().
  */

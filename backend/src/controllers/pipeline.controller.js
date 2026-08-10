@@ -17,6 +17,7 @@ import { convertMarkdownToPdf } from '../utils/markdown-to-pdf.util.js';
 import axios from 'axios';
 import { sendNotesReadyEmail } from '../utils/email.util.js';
 import ChatWithNotesAgent from '../agents/ChatWithNotesAgent.js';
+import { waitUntil } from '@vercel/functions';
 
 dotenv.config();
 
@@ -162,23 +163,31 @@ export async function generateNotesController(req, res) {
       }
     }
 
-    // Add the job to the queue
-    const job = await addToQueue(requestId, {
-      requestBody: req.body,
-      requestIdDb: request._id,
-      userId: request._userID,
-    });
-
     await request.updateOne({
       status: 'queued',
     });
+
+    let jobId = null;
+
+    if (process.env.VERCEL) {
+      console.log(`[${requestId}] Serverless runtime detected (Vercel). Executing note generation with waitUntil.`);
+      waitUntil(generateNotes(requestId, req.body, request._id, userDoc._id));
+    } else {
+      // Local development in-memory queue
+      const job = await addToQueue(requestId, {
+        requestBody: req.body,
+        requestIdDb: request._id,
+        userId: userDoc._id,
+      });
+      jobId = job._id;
+    }
 
     // Return the requestId immediately — client will poll /generation-status/:requestId
     res.status(202).json({
       success: true,
       message: 'Notes generation queued',
       requestId: requestId,
-      jobId: job.id,
+      jobId: jobId,
       estimatedTimeSeconds: calculateEstimatedTime(
         syllabus.length,
         note_type,
