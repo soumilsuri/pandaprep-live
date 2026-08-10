@@ -3,13 +3,13 @@ import dotenv from "dotenv";
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-// Constants
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const IMAGE_CACHE_DIR = path.join(process.cwd(), 'temp', 'images');
+// Vercel mounts the deployed bundle at /var/task, which is read-only.
+// /tmp is writable in serverless functions; retain the project temp directory locally.
+const TEMP_DIR = process.env.VERCEL ? '/tmp' : path.join(process.cwd(), 'temp');
+const IMAGE_CACHE_DIR = path.join(TEMP_DIR, 'images');
 
 // Ensure image cache directory exists
 if (!fs.existsSync(IMAGE_CACHE_DIR)) {
