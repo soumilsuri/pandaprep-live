@@ -30,4 +30,5 @@ app.use("/api/commons", commonsRoutes)
 app.use("/api", healthCheckRoutes)
 app.use("/", healthCheckRoutes)
 
-export { app }
+export { app };
+export default app;
