@@ -14,9 +14,8 @@ Instead, PandaPrep implements a **Bounded Agentic Workflow** over **Deterministi
 
 ### Core Tech Stack
 - **Language**: **TypeScript** (for all new agent runtime code in `src/agentic/`)
-- **Agent Framework**: **LangGraph.js** (`@langchain/langgraph`) & **LangChain** (`@langchain/core`)
-- **LLMs**: Groq `llama-3.3-70b-versatile` (Writers/Planner) & Google `gemini-3.7-flash` (Intake/Verifier/Q&A)
-- **Embeddings**: Google `gemini-embedding-2`
+- **Agent Framework**: **LangGraph.js** (`@langchain/langgraph`) & **LangChain** (`@langchain/core`, `@langchain/openai`)
+- **Unified Model**: **DeepSeek V4 Flash Free** (`deepseek-v4-flash-free`) via **OpenCode Zen** ([https://opencode.ai/docs/](https://opencode.ai/docs/))
 - **Database & Vector Store**: MongoDB Atlas (Atomic queue, Notes Workspace, LangGraph checkpoints, Atlas Vector Search)
 - **Frontend**: Next.js, React, `react-markdown`, `rehype-katex`
 
@@ -90,9 +89,8 @@ To guarantee reliability and prevent cost blowouts, boundaries are strictly enfo
 
 Every agentic step operates under strict constraints:
 1. **Bounded Repair Loops**: Maximum 2 repair iterations per section, plus 1 document-level pass. If a gap remains unresolved, it is recorded in `outstanding_gaps` and delivered visibly rather than looping indefinitely.
-2. **Model Tier Allocation**:
-   - Complex generation (Writers, Planner): High-capability LLMs (Groq `llama-3.3-70b-versatile` / Google `gemini-3.7-flash`).
-   - Structured checks (Intake, Verifier): Google `gemini-3.7-flash` (or fast tier).
+2. **Unified High-Efficiency Model**:
+   - All agent stages (Intake, Planner, Writers, Verifier, Repair, Q&A) use **DeepSeek V4 Flash Free** via **OpenCode Zen** ([https://opencode.ai/docs/](https://opencode.ai/docs/)), providing 1M context, MoE efficiency, and generous free rate limits.
 3. **Scoped Prompts (No Context Dumps)**: Writers are provided only a scoped summary of their dependencies, required terms, and style rules—never the full raw workspace or entire syllabus transcript.
 4. **Adaptive Web Search**: `search_web` is triggered strictly when a syllabus line is sparse (e.g. "Unit 3: Trees") or when a Q&A question falls outside reference material.
 5. **No WebSocket Theater**: Generation progress is tracked via clean database polling (`GET /api/pipeline/generation-status/:requestId`) and email notification, eliminating complex connection state.

@@ -1,0 +1,366 @@
+[
+  {
+    "id": "cs-01",
+    "category": "Computer Science",
+    "subject_name": "Advanced Graph Algorithms & Dynamic Programming",
+    "syllabus": "Unit 1: Shortest Paths (Dijkstra, Bellman-Ford, Floyd-Warshall)\nUnit 2: Minimum Spanning Trees (Kruskal, Prim) & Disjoint Set Union\nUnit 3: Dynamic Programming on Trees and DAGs\nUnit 4: Network Flow, Ford-Fulkerson & Max-Flow Min-Cut Theorem",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Dijkstra",
+      "Bellman-Ford",
+      "Floyd-Warshall",
+      "Kruskal",
+      "Prim",
+      "Disjoint Set Union",
+      "Dynamic Programming",
+      "Network Flow",
+      "Ford-Fulkerson",
+      "Max-Flow Min-Cut"
+    ]
+  },
+  {
+    "id": "cs-02",
+    "category": "Computer Science",
+    "subject_name": "Distributed Systems & Consensus Protocols",
+    "syllabus": "Unit 1: CAP Theorem, PACELC, and Eventual Consistency Models\nUnit 2: Logical Clocks (Lamport Timestamps, Vector Clocks)\nUnit 3: Consensus Mechanisms: Paxos and Raft State Machine Replication\nUnit 4: Distributed Transactions, 2-Phase Commit (2PC) and Saga Patterns",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "CAP Theorem",
+      "PACELC",
+      "Lamport Timestamps",
+      "Vector Clocks",
+      "Paxos",
+      "Raft",
+      "State Machine Replication",
+      "2-Phase Commit",
+      "Saga Pattern"
+    ]
+  },
+  {
+    "id": "cs-03",
+    "category": "Computer Science",
+    "subject_name": "Operating Systems: Virtual Memory & Concurrency",
+    "syllabus": "Unit 1: Paging, Multi-level Page Tables, TLB, and Inverted Page Tables\nUnit 2: Page Replacement Algorithms (LRU, Clock, Optimal MIN)\nUnit 3: Concurrency Primitives: Mutexes, Semaphores, Condition Variables, and Monitors\nUnit 4: Deadlocks: Coffman Conditions, Banker's Algorithm, Detection and Recovery",
+    "education_level": "intermediate",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Paging",
+      "Page Tables",
+      "TLB",
+      "LRU",
+      "Clock Algorithm",
+      "Mutex",
+      "Semaphore",
+      "Condition Variable",
+      "Coffman Conditions",
+      "Banker's Algorithm"
+    ]
+  },
+  {
+    "id": "cs-04",
+    "category": "Computer Science",
+    "subject_name": "Database Internals & Storage Engines",
+    "syllabus": "Unit 1: Disk Storage, Buffer Pool Management, and Page Formats\nUnit 2: B+ Trees, LSM Trees, and Write-Ahead Logging (WAL)\nUnit 3: Concurrency Control: Strict 2PL, MVCC, and Snapshot Isolation\nUnit 4: ARIES Crash Recovery Protocol: Analysis, Redo, and Undo Phases",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Buffer Pool",
+      "B+ Tree",
+      "LSM Tree",
+      "Write-Ahead Logging",
+      "Strict 2PL",
+      "MVCC",
+      "Snapshot Isolation",
+      "ARIES Protocol",
+      "Crash Recovery"
+    ]
+  },
+  {
+    "id": "chem-01",
+    "category": "Organic Chemistry",
+    "subject_name": "Electrophilic Aromatic Substitution & Reaction Mechanisms",
+    "syllabus": "Unit 1: Benzene Resonance Energy & Hückel's 4n+2 Rule\nUnit 2: EAS Mechanisms: Nitration, Sulfonation, Halogenation, Friedel-Crafts Alkylation & Acylation\nUnit 3: Substituent Effects: Ortho/Para vs. Meta Directors and Activating/Deactivating Groups\nUnit 4: Nucleophilic Aromatic Substitution (Addition-Elimination & Benzyne Mechanism)",
+    "education_level": "intermediate",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Resonance Energy",
+      "Hückel Rule",
+      "Nitration",
+      "Sulfonation",
+      "Friedel-Crafts",
+      "Ortho/Para Director",
+      "Meta Director",
+      "Benzyne Mechanism"
+    ]
+  },
+  {
+    "id": "chem-02",
+    "category": "Organic Chemistry",
+    "subject_name": "Stereochemistry & Conformational Analysis",
+    "syllabus": "Unit 1: Chirality, Enantiomers, Diastereomers, and Meso Compounds\nUnit 2: Cahn-Ingold-Prelog (CIP) Priority Rules & R/S Configuration Assignment\nUnit 3: Cyclohexane Chair Conformations, Ring Flips, and 1,3-Diaxial Interactions\nUnit 4: Optical Activity, Specific Rotation, and Racemic Mixtures",
+    "education_level": "intermediate",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Chirality",
+      "Enantiomers",
+      "Diastereomers",
+      "Meso Compounds",
+      "Cahn-Ingold-Prelog",
+      "R/S Configuration",
+      "Chair Conformation",
+      "1,3-Diaxial Interactions",
+      "Specific Rotation"
+    ]
+  },
+  {
+    "id": "chem-03",
+    "category": "Organic Chemistry",
+    "subject_name": "Carbonyl Chemistry & Enolate Additions",
+    "syllabus": "Unit 1: Nucleophilic Addition to Aldehydes and Ketones (Hydration, Acetal Formation)\nUnit 2: Carboxylic Acid Derivatives & Nucleophilic Acyl Substitution\nUnit 3: Enols, Enolates, and Keto-Enol Tautomerism\nUnit 4: Aldol Condensation, Claisen Condensation, and Michael Addition Reactions",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Nucleophilic Addition",
+      "Acetal Formation",
+      "Nucleophilic Acyl Substitution",
+      "Keto-Enol Tautomerism",
+      "Aldol Condensation",
+      "Claisen Condensation",
+      "Michael Addition"
+    ]
+  },
+  {
+    "id": "chem-04",
+    "category": "Organic Chemistry",
+    "subject_name": "Bio-organic Chemistry & Enzyme Kinetics",
+    "syllabus": "Unit 1: Amino Acid Structure, Zwitterions, and Isoelectric Point (pI)\nUnit 2: Peptide Bond Formation, Primary/Secondary/Tertiary Protein Structure\nUnit 3: Carbohydrate Fischer/Haworth Projections, Mutarotation, and Glycosidic Bonds\nUnit 4: Enzyme Catalysis & Michaelis-Menten Kinetics (Km, Vmax, Lineweaver-Burk)",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Zwitterion",
+      "Isoelectric Point",
+      "Peptide Bond",
+      "Protein Structure",
+      "Haworth Projection",
+      "Mutarotation",
+      "Michaelis-Menten",
+      "Lineweaver-Burk"
+    ]
+  },
+  {
+    "id": "thermo-01",
+    "category": "Thermodynamics",
+    "subject_name": "First & Second Laws & Carnot Heat Engines",
+    "syllabus": "Unit 1: State Variables, Equations of State, and Work in Quasi-static Processes\nUnit 2: First Law of Thermodynamics, Internal Energy, and Heat Capacities (Cp, Cv)\nUnit 3: Second Law: Clausius and Kelvin-Planck Statements\nUnit 4: Carnot Cycle, Thermal Efficiency, and Thermodynamic Temperature Scale",
+    "education_level": "intermediate",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "First Law",
+      "Internal Energy",
+      "Heat Capacity",
+      "Second Law",
+      "Clausius Statement",
+      "Kelvin-Planck",
+      "Carnot Cycle",
+      "Thermal Efficiency"
+    ]
+  },
+  {
+    "id": "thermo-02",
+    "category": "Thermodynamics",
+    "subject_name": "Entropy, Enthalpy & Gibbs Free Energy",
+    "syllabus": "Unit 1: Thermodynamic Definition of Entropy and Clausius Inequality\nUnit 2: Enthalpy, Helmholtz Free Energy (A), and Gibbs Free Energy (G)\nUnit 3: Fundamental Thermodynamic Relations & Maxwell Relations\nUnit 4: Criteria for Spontaneity and Chemical Equilibrium (Van 't Hoff Equation)",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Entropy",
+      "Clausius Inequality",
+      "Enthalpy",
+      "Gibbs Free Energy",
+      "Maxwell Relations",
+      "Spontaneity",
+      "Van 't Hoff Equation"
+    ]
+  },
+  {
+    "id": "thermo-03",
+    "category": "Thermodynamics",
+    "subject_name": "Phase Equilibria & Clausius-Clapeyron Equation",
+    "syllabus": "Unit 1: Gibbs Phase Rule and Degree of Freedom in Single and Multi-component Systems\nUnit 2: First-order vs. Continuous Phase Transitions\nUnit 3: The Clausius-Clapeyron Equation for Vapor-Liquid and Solid-Liquid Boundaries\nUnit 4: Binary Phase Diagrams, Eutectic Points, and Lever Rule Calculations",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Gibbs Phase Rule",
+      "Phase Transitions",
+      "Clausius-Clapeyron",
+      "Vapor Pressure",
+      "Binary Phase Diagram",
+      "Eutectic Point",
+      "Lever Rule"
+    ]
+  },
+  {
+    "id": "thermo-04",
+    "category": "Thermodynamics",
+    "subject_name": "Statistical Mechanics & Maxwell-Boltzmann Distribution",
+    "syllabus": "Unit 1: Microstates, Macrostates, and the Statistical Definition of Entropy (Boltzmann Equation)\nUnit 2: Microcanonical, Canonical, and Grand Canonical Ensembles\nUnit 3: Partition Function (Z) and Thermodynamic Quantities Derivations\nUnit 4: Maxwell-Boltzmann Molecular Speed Distribution and Equipartition Theorem",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Microstates",
+      "Boltzmann Equation",
+      "Canonical Ensemble",
+      "Partition Function",
+      "Maxwell-Boltzmann Distribution",
+      "Equipartition Theorem"
+    ]
+  },
+  {
+    "id": "law-01",
+    "category": "Constitutional Law",
+    "subject_name": "Judicial Review & Fundamental Constitutional Rights",
+    "syllabus": "Unit 1: Origins and Scope of Judicial Review (Marbury v. Madison)\nUnit 2: Justiciability Doctrines: Standing, Ripeness, Mootness, and Political Question\nUnit 3: Incorporation Doctrine and Application of the Bill of Rights to the States\nUnit 4: Freedom of Speech: Strict Scrutiny, Content-Based vs. Content-Neutral Restrictions",
+    "education_level": "intermediate",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Judicial Review",
+      "Marbury v. Madison",
+      "Standing",
+      "Ripeness",
+      "Mootness",
+      "Incorporation Doctrine",
+      "Strict Scrutiny",
+      "Freedom of Speech"
+    ]
+  },
+  {
+    "id": "law-02",
+    "category": "Constitutional Law",
+    "subject_name": "Separation of Powers & Executive Authority",
+    "syllabus": "Unit 1: Tripartite System of Checks and Balances in Constitutional Frameworks\nUnit 2: Executive Powers: Commander-in-Chief, Treaty-Making, and Executive Orders (Youngstown Sheet & Tube)\nUnit 3: Legislative Powers: Commerce Clause, Taxing & Spending, and Non-Delegation Doctrine\nUnit 4: Executive Privilege, Presidential Immunity, and Impeachment Standards",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Checks and Balances",
+      "Youngstown Sheet & Tube",
+      "Executive Orders",
+      "Commerce Clause",
+      "Non-Delegation Doctrine",
+      "Executive Privilege",
+      "Presidential Immunity",
+      "Impeachment"
+    ]
+  },
+  {
+    "id": "law-03",
+    "category": "Constitutional Law",
+    "subject_name": "Equal Protection & Substantive Due Process",
+    "syllabus": "Unit 1: Fourteenth Amendment Equal Protection Framework\nUnit 2: Standards of Scrutiny: Rational Basis, Intermediate Scrutiny, and Strict Scrutiny\nUnit 3: Suspect and Quasi-Suspect Classifications (Race, Gender, Alienage)\nUnit 4: Substantive Due Process: Fundamental Rights to Privacy, Autonomy, and Family",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Fourteenth Amendment",
+      "Equal Protection",
+      "Rational Basis",
+      "Intermediate Scrutiny",
+      "Strict Scrutiny",
+      "Suspect Classifications",
+      "Substantive Due Process",
+      "Right to Privacy"
+    ]
+  },
+  {
+    "id": "law-04",
+    "category": "Constitutional Law",
+    "subject_name": "Federalism & Interstate Commerce Clause",
+    "syllabus": "Unit 1: Dual Sovereignty and the Tenth Amendment Reservation of Powers\nUnit 2: Dormant Commerce Clause & Undue Burden on Interstate Trade (Pike Balancing Test)\nUnit 3: Federal Preemption: Express Preemption, Field Preemption, and Conflict Preemption\nUnit 4: State Police Powers and Public Health Jurisprudence",
+    "education_level": "intermediate",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Federalism",
+      "Tenth Amendment",
+      "Dormant Commerce Clause",
+      "Pike Balancing Test",
+      "Federal Preemption",
+      "Conflict Preemption",
+      "Police Powers"
+    ]
+  },
+  {
+    "id": "med-01",
+    "category": "Medical Physiology",
+    "subject_name": "Cardiac Electrophysiology & Action Potentials",
+    "syllabus": "Unit 1: Cardiac Conduction Pathway: SA Node, AV Node, Bundle of His, and Purkinje Fibers\nUnit 2: Ventricular Myocyte Action Potential (Phases 0 through 4) & Ion Channels (Na+, Ca2+, K+)\nUnit 3: Pacemaker Potential & Autonomic Regulation (Sympathetic and Parasympathetic Control)\nUnit 4: ECG Waveform Interpretation: P-wave, QRS Complex, T-wave, and PR/QT Intervals",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "SA Node",
+      "AV Node",
+      "Purkinje Fibers",
+      "Action Potential Phases",
+      "Pacemaker Potential",
+      "ECG Waveform",
+      "P-wave",
+      "QRS Complex",
+      "T-wave"
+    ]
+  },
+  {
+    "id": "med-02",
+    "category": "Medical Physiology",
+    "subject_name": "Renal Glomerular Filtration & Countercurrent Mechanism",
+    "syllabus": "Unit 1: Nephron Architecture: Glomerulus, Bowman's Capsule, and Tubular Segments\nUnit 2: Glomerular Filtration Rate (GFR), Net Filtration Pressure, and Autoregulation (Myogenic, TGF)\nUnit 3: Tubular Reabsorption & Secretion in Proximal and Distal Convoluted Tubules\nUnit 4: Countercurrent Multiplier and Exchanger in Loop of Henle and Vasa Recta (Urine Concentration)",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Nephron Architecture",
+      "Glomerular Filtration Rate",
+      "Tubuloglomerular Feedback",
+      "Tubular Reabsorption",
+      "Countercurrent Multiplier",
+      "Loop of Henle",
+      "Vasa Recta"
+    ]
+  },
+  {
+    "id": "med-03",
+    "category": "Medical Physiology",
+    "subject_name": "Synaptic Plasticity & Neurotransmission",
+    "syllabus": "Unit 1: Resting Membrane Potential (Nernst and Goldman-Hodgkin-Katz Equations)\nUnit 2: Presynaptic Action Potential, Voltage-Gated Ca2+ Channels, and Neurotransmitter Exocytosis\nUnit 3: Postsynaptic Receptors: Ionotropic vs. Metabotropic (EPSPs and IPSPs)\nUnit 4: Synaptic Plasticity: Long-Term Potentiation (LTP), NMDA/AMPA Receptor Dynamics, and LTD",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Resting Membrane Potential",
+      "Nernst Equation",
+      "Neurotransmitter Exocytosis",
+      "Ionotropic",
+      "Metabotropic",
+      "EPSP",
+      "IPSP",
+      "Long-Term Potentiation",
+      "NMDA",
+      "AMPA"
+    ]
+  },
+  {
+    "id": "med-04",
+    "category": "Medical Physiology",
+    "subject_name": "Pulmonary Mechanics & Alveolar Gas Exchange",
+    "syllabus": "Unit 1: Lung Volumes and Capacities (Tidal Volume, FVC, FEV1, Residual Volume)\nUnit 2: Mechanics of Breathing: Intrapleural Pressure, Transpulmonary Pressure, and Compliance\nUnit 3: Pulmonary Surfactant, Law of Laplace, and Alveolar Surface Tension\nUnit 4: Alveolar-Capillary Gas Exchange: Fick's Law of Diffusion, V/Q Matching, and Oxygen-Hemoglobin Dissociation Curve",
+    "education_level": "advanced",
+    "note_type": "detailed",
+    "key_topics_expected": [
+      "Lung Volumes",
+      "FEV1",
+      "Intrapleural Pressure",
+      "Compliance",
+      "Pulmonary Surfactant",
+      "Law of Laplace",
+      "Fick's Law",
+      "V/Q Matching",
+      "Oxygen-Hemoglobin Dissociation"
+    ]
+  }
+]

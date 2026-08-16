@@ -17,6 +17,7 @@ Use this directory to load minimal, token-efficient context tailored to the spec
 | **Prompt templates, Planner, Writer, Verifier, Repair Loop, or Q&A Agent** | [`05-agent-specifications.md`](./05-agent-specifications.md) | Exact responsibilities, input/output JSON schemas, contract checks, prompt constraints, and repair bounding rules for each agent. |
 | **Tools (Vector search, MongoDB storage, Email) & Mongo Queue** | [`06-tool-registry-and-infra.md`](./06-tool-registry-and-infra.md) | In-process Tool Registry, pure Markdown storage in MongoDB, Mongo-backed atomic queue claim (`findOneAndUpdate`), heartbeat sweeper, and checkpointing. |
 | **Implementation phases, step-by-step roadmap, observability, testing** | [`07-implementation-and-migration-roadmap.md`](./07-implementation-and-migration-roadmap.md) | 5-phase migration roadmap, Markdown viewer UI rollout, cost/latency controls, structured logging, correlation IDs, and testing matrix. |
+| **Observability, Langfuse telemetry, health metrics, and CI/CD evals** | [`08-agentic-observability-and-evals.md`](./08-agentic-observability-and-evals.md) | Implementation specs for Langfuse tracing, real-time MongoDB metrics endpoints, Golden Dataset evals, and DeepSeek V4 Flash Free migration. |
 
 ---
 
@@ -43,5 +44,6 @@ Use this directory to load minimal, token-efficient context tailored to the spec
 ├── 04-notes-workspace-schema.md            # Working memory schema (notes_workspaces collection)
 ├── 05-agent-specifications.md              # Planner, Writer, Verifier, and Q&A Agent specs & prompts
 ├── 06-tool-registry-and-infra.md           # Tool registry, Markdown storage, Mongo queue & checkpointer
-└── 07-implementation-and-migration-roadmap.md # Step-by-step rollout, observability & testing
+├── 07-implementation-and-migration-roadmap.md # Step-by-step rollout, observability & testing
+└── 08-agentic-observability-and-evals.md   # Observability, Langfuse telemetry, metrics & evals guide
 ```

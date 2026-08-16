@@ -1,16 +1,16 @@
 # 05 — Agent Specifications & Prompts
 
 > **Developer Reference & Official Documentation**:
-> - Base Gemini API Docs: [https://ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs)
-> - Gemini 3.7 Flash Model: [https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash](https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash)
-> - Gemini Embeddings (`gemini-embedding-2`): [https://ai.google.dev/gemini-api/docs/embeddings](https://ai.google.dev/gemini-api/docs/embeddings)
-> - Agent Framework: **LangChain** (`@langchain/core`, `@langchain/google-genai`, `@langchain/groq`) & **LangGraph.js** (`@langchain/langgraph`)
+> - OpenCode AI Documentation: [https://opencode.ai/docs/](https://opencode.ai/docs/)
+> - Model: **DeepSeek V4 Flash Free** (`deepseek-v4-flash-free`) via **OpenCode Zen** (`https://api.opencode.ai/v1`)
+> - Agent Framework: **LangChain** (`@langchain/core`, `@langchain/openai`) & **LangGraph.js** (`@langchain/langgraph`) configured with OpenCode Zen base URL and API keys.
+> - High Context & Generous Free Quota: 1M token context window with fast MoE throughput.
 
 ---
 
 ## 1. Intake Resolution Step
 
-- **Model Tier**: Fast/Lightweight (Google `gemini-3.7-flash` or fast tier)
+- **Model Tier**: **DeepSeek V4 Flash Free** (via OpenCode Zen)
 - **Role**: Interprets free-text `user_instructions` (e.g., "I just need to pass" vs "I want rigorous depth") to set definitive style and depth parameters before planning begins.
 - **Output**: JSON payload configuring `education_level`, `depth`, and `focus_areas`.
 
@@ -18,7 +18,7 @@
 
 ## 2. Planner Agent
 
-- **Model Tier**: Capable LLM (Groq `llama-3.3-70b-versatile` or Google `gemini-3.7-flash`)
+- **Model Tier**: **DeepSeek V4 Flash Free** (via OpenCode Zen)
 - **Role**: Decomposes raw syllabus into an actionable, testable plan:
   1. Builds the `topic_graph` with semantic prerequisites and section ordering.
   2. Generates the `coverage_checklist` mapping every syllabus requirement to a section.
@@ -84,7 +84,7 @@ Return ONLY a valid JSON object matching the Planner Output Schema.
 
 ## 3. Writer Agent
 
-- **Model Tier**: High-Capability LLM (Groq `llama-3.3-70b-versatile`)
+- **Model Tier**: **DeepSeek V4 Flash Free** (via OpenCode Zen, MoE architecture with fast throughput)
 - **Role**: Drafts individual sections against the Notes Workspace.
 - **Execution**: Independent sections generate concurrently; prerequisite-chained sections generate in topological sequence.
 
@@ -112,8 +112,7 @@ RULES:
 ### Output JSON Schema
 ```json
 {
-  "section_id": "sec_02",
-  "content_markdown": "## AVL Trees and Rotations\n\nAs established in [BST Fundamentals](#sec-01-bst), ...",
+  "section_markdown": "## 2. Self-Balancing AVL Trees & Rotations\n\n...",
   "new_terms_defined": [
     {
       "term": "Balance Factor",
@@ -134,7 +133,7 @@ RULES:
 
 ## 4. Verifier Agent & Repair Loop
 
-- **Model Tier**: Structured Evaluator (Google `gemini-3.7-flash` or fast tier)
+- **Model Tier**: **DeepSeek V4 Flash Free** (via OpenCode Zen, structured evaluation)
 - **Role**: Executes concrete automated contract checks across generated notes before finalization.
 
 ### The 6 Contract Checks

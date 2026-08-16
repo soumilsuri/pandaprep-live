@@ -9,7 +9,7 @@ To guarantee zero downtime and avoid breaking the existing user base, the new ag
 ### 🚀 Phase 1: TypeScript Setup, Core Runtime (LangGraph.js) & Mongo-Backed Queue
 - **Deliverables**:
   - Configure **TypeScript** (`tsconfig.json`, `tsx` / `ts-node` runtime) in `backend/` for the new `src/agentic/` module.
-  - Set up **LangGraph.js** (`@langchain/langgraph`, `@langchain/core`, `@langchain/google-genai`, `@langchain/groq`).
+  - Set up **LangGraph.js** (`@langchain/langgraph`, `@langchain/core`, `@langchain/openai` configured for OpenCode Zen API).
   - Implement strongly-typed `MissionModel` and `AgentCheckpointModel` in MongoDB for LangGraph checkpointer.
   - Build atomic job claim (`claimNextMission`), worker heartbeat, and stale mission recovery sweeper (`recoverStaleMissions`).
   - Set up LangGraph `StateGraph` with MongoDB checkpoint persistence.
@@ -56,9 +56,9 @@ To guarantee zero downtime and avoid breaking the existing user base, the new ag
 | Constraint Area | Target Limit | Enforcement Mechanism |
 |---|---|---|
 | **Repair Loop Iterations** | Max 2 per section, 1 doc pass | Graph transition condition checks loop counter in workspace. |
-| **Writer Concurrency** | Bounded (e.g. 3 concurrent) | `p-limit` or worker pool tied to Groq rate limits. |
+| **Writer Concurrency** | Bounded (e.g. 3 concurrent) | `p-limit` or worker pool tied to OpenCode Zen rate limits. |
 | **Prompt Size** | Scoped Workspace Summary | Filter workspace down to prerequisites only via `getScopedWorkspaceSlice`. |
-| **Model Tiers** | Fast tier for checks; capable for draft | Route Verifier/Intake to `gemini-3.7-flash` (or fast tier) and Planner/Writers to capable tier (Groq 70B / `gemini-3.7-flash`). |
+| **Model Tiers** | Unified Fast MoE Model | **DeepSeek V4 Flash Free** via **OpenCode Zen** ([https://opencode.ai/docs/](https://opencode.ai/docs/)). |
 | **Q&A Tool Depth** | Max 3–4 calls per message | Agent graph termination condition after 4 tool executions. |
 
 ---

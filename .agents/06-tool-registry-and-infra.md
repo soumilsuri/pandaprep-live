@@ -14,9 +14,9 @@ An internal typed registry provides identical tool capabilities with zero transp
 
 | Tool | Invocation Trigger | Underlying Implementation |
 |---|---|---|
-| `retrieve_reference` | Writer needs source material for section | Atlas Vector Search over document embeddings (`gemini-embedding-2`). |
+| `retrieve_reference` | Writer needs source material for section | Atlas Vector Search over document embeddings. |
 | `retrieve_workspace` | Writer / Q&A needs notes workspace facts | Direct query against MongoDB `notes_workspaces` collection. |
-| `search_web` | Sparse syllabus line OR out-of-scope Q&A | Web search API (e.g. Tavily / Gemini Grounding) with strict token limits on results. |
+| `search_web` | Sparse syllabus line OR out-of-scope Q&A | Web search API (e.g. Tavily Search) with strict token limits on results. |
 | `finalize_markdown` | Finalize step after verification passes | Compiles TOC, validates LaTeX syntax, saves final Markdown string to MongoDB. |
 | `notify` | Notes generated & saved | Brevo Transactional Email API (notifying user notes are ready to view/download). |
 
