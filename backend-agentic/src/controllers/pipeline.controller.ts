@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { MissionModel } from '../models/mission.model.js';
 import { NotesRequestModel } from '../models/notes-request.model.js';
+import { defaultWorker } from '../queue/worker.js';
 import { logger } from '../config/logger.js';
 
 const ESTIMATED_GENERATION_SECONDS = 45;
@@ -84,7 +85,19 @@ export async function generateNotesHandler(req: Request, res: Response) {
       'Notes generation mission queued'
     );
 
-    // 3. Return HTTP 202 Accepted response as specified in API contract
+    // 3. If running on Vercel Serverless, ensure background processing is triggered via waitUntil
+    if (process.env.VERCEL) {
+      try {
+        const { waitUntil } = await import('@vercel/functions');
+        waitUntil(defaultWorker.processMission(mission));
+      } catch {
+        defaultWorker.processMission(mission).catch((err) => {
+          logger.error({ err, requestId }, 'Asynchronous mission processing error on serverless');
+        });
+      }
+    }
+
+    // 4. Return HTTP 202 Accepted response as specified in API contract
     return res.status(202).json({
       success: true,
       message: 'Notes generation queued',

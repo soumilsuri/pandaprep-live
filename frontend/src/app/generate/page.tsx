@@ -33,6 +33,7 @@ import {
 
 import AnimatedInput from "@/components/global/input";
 import { Switch } from "@/components/ui/switch";
+import PDFUpload from "@/components/global/pdf-upload";
 
 const NotesGenerate = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -884,57 +885,24 @@ const NotesGenerate = () => {
               </div>
             </div>
 
-            {/* Add Context — FAISS temporarily disabled, showing Coming Soon */}
+            {/* Add Context — PDF Upload */}
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <p className={`${montserrat500.className} text-xl sm:text-2xl`}>
                   Add Context (Optional)
                 </p>
               </div>
-              {/* Disabled FAISS context upload with Coming Soon tooltip */}
-              <div className="relative group">
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center select-none cursor-not-allowed opacity-50 transition-all duration-200 ${
-                    isDarkMode
-                      ? "border-[#444340] bg-[#252320]"
-                      : "border-gray-300 bg-gray-50"
-                  }`}
-                  onClick={() => setShowContextTooltip(true)}
-                  onMouseLeave={() => setShowContextTooltip(false)}
-                >
-                  <div className="flex flex-col items-center space-y-2">
-                    <Clock
-                      className={`w-5 h-5 ${
-                        isDarkMode ? "text-[#A9A29A]" : "text-gray-400"
-                      }`}
-                    />
-                    <p
-                      className={`text-sm font-medium ${
-                        isDarkMode ? "text-[#A9A29A]" : "text-gray-400"
-                      }`}
-                    >
-                      Upload PDF
-                    </p>
-                    <p
-                      className={`text-xs ${
-                        isDarkMode ? "text-[#666]" : "text-gray-400"
-                      }`}
-                    >
-                      Drag &amp; drop or click to browse (Max 10MB)
-                    </p>
-                  </div>
-                </div>
-                {/* Coming Soon Tooltip */}
-                <div
-                  className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white p-2 rounded text-xs w-36 text-center transition-opacity pointer-events-none z-10 ${
-                    showContextTooltip
-                      ? "opacity-100"
-                      : "opacity-0 group-hover:opacity-100"
-                  }`}
-                >
-                  Coming Soon
-                </div>
-              </div>
+              <PDFUpload
+                onUploadSuccess={(url) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    relativePathToReferenceMaterial: url,
+                  }))
+                }
+                isDarkMode={isDarkMode}
+                userId={user?.uid}
+                initialValue={formData.relativePathToReferenceMaterial}
+              />
               <p
                 className={`${montserrat400.className} text-sm sm:text-base ${
                   isDarkMode ? "text-[#A9A29A]" : "text-[#4A4947]"
@@ -1145,7 +1113,7 @@ const NotesGenerate = () => {
         <div
           className={`${
             isDarkMode ? "bg-[#333230]" : "bg-[#D9D9D966]"
-          } rounded-xl p-1.5 flex justify-between items-center mt-5 min-h-[50px] sm:h-[65px] transition-colors duration-300`}
+          } rounded-xl p-1.5 flex justify-between items-center mt-5 min-h-[50px] sm:h-[65px] transition-colors duration-300 opacity-60 cursor-not-allowed`}
         >
           <div className="pl-2 sm:pl-3 flex items-center gap-2 sm:gap-3">
             <div
@@ -1183,60 +1151,24 @@ const NotesGenerate = () => {
 
                 <span
                   className={`
-          absolute left-0 bottom-full mb-2 bg-gray-800 text-white p-2 rounded text-sm w-28 sm:w-48
+          absolute left-0 bottom-full mb-2 bg-gray-800 text-white p-2 rounded text-sm w-36 sm:w-48
           transition-opacity duration-200
           ${showTooltip ? "opacity-100 block" : "opacity-0 hidden"}
           group-hover:opacity-100 group-hover:block
           pointer-events-none
         `}
                 >
-                  This is an experimental feature
+                  Feature temporarily disabled
                 </span>
               </span>
             </p>
           </div>
           <div className="pr-2 sm:pr-4">
             <Switch
-              checked={formData.include_images === "yes"}
-              onCheckedChange={(checked) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  include_images: checked ? "yes" : "no",
-                }));
-                if (checked) setShowDisclaimer(true);
-              }}
+              checked={false}
+              disabled={true}
+              onCheckedChange={() => {}}
             />
-
-            {showDisclaimer && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs">
-                <div
-                  className={`rounded-2xl p-6 w-11/12 max-w-3xl shadow-2xl border ${
-                    isDarkMode
-                      ? "bg-[#1E1D1B] text-[#D0CCC4] border-[#D0CCC4]"
-                      : "bg-[#FAF7F0] text-[#4A4947]"
-                  } ${montserrat600.className}`}
-                >
-                  <h2 className="text-2xl font-bold mb-4">
-                    <strong>Disclaimer</strong>
-                  </h2>
-                  <p className="text-md sm:text-lg mb-4">
-                    This is an <strong>experimental feature</strong>. Images are
-                    AI-generated and may not always accurately represent the
-                    content. Please review them before use.
-                  </p>
-                  <button
-                    onClick={() => setShowDisclaimer(false)}
-                    className={`mt-2 px-4 py-2 rounded-lg font-semibold transition ${
-                      isDarkMode
-                        ? "bg-[#D29C7B] text-[#1E1D1B] hover:bg-[#9e765e]"
-                        : "bg-[#B17457] text-[#FAF7F0] hover:bg-[#8c5540]"
-                    }`}
-                  >
-                    Got it!
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

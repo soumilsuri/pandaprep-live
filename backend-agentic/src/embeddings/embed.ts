@@ -1,17 +1,42 @@
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
 
+export interface GenerateEmbeddingOptions {
+  outputDimensionality?: number;
+  task?: 'search_result' | 'question_answering' | 'fact_checking' | 'code_retrieval';
+  title?: string;
+  isQuery?: boolean;
+}
+
 /**
- * Generates an embedding vector for a single text using Google Gemini Embedding API.
- * Throws on any failure so callers never treat a zero/empty vector as valid.
+ * Generates an embedding vector using Google's latest `gemini-embedding-2` model.
+ * Defaults to 768 dimensions (auto-normalized via Matryoshka Representation Learning)
+ * for optimal speed, storage efficiency, and MongoDB Atlas Vector Search compatibility.
  */
-export async function generateEmbedding(text: string): Promise<number[]> {
+export async function generateEmbedding(
+  text: string,
+  options: GenerateEmbeddingOptions = {}
+): Promise<number[]> {
   if (!env.GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY not configured; cannot generate embeddings');
   }
 
+  const dimensionality = options.outputDimensionality ?? 768;
+
+  // Format text with task prefix recommended for gemini-embedding-2 if task is specified
+  let formattedText = text;
+  if (options.task) {
+    const taskName = options.task.replace('_', ' ');
+    if (options.isQuery) {
+      formattedText = `task: ${taskName} | query: ${text}`;
+    } else {
+      const docTitle = options.title || 'none';
+      formattedText = `title: ${docTitle} | text: ${text}`;
+    }
+  }
+
   try {
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent';
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -19,10 +44,10 @@ export async function generateEmbedding(text: string): Promise<number[]> {
         'x-goog-api-key': env.GEMINI_API_KEY,
       },
       body: JSON.stringify({
-        model: 'models/text-embedding-004',
         content: {
-          parts: [{ text }],
+          parts: [{ text: formattedText }],
         },
+        output_dimensionality: dimensionality,
       }),
     });
 

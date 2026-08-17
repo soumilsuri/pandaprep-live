@@ -5,7 +5,7 @@ import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { env } from '../config/env.js';
 
 /**
- * Creates an LLM client with Google Gemini 3.7 Flash as the primary engine,
+ * Creates an LLM client with Google Gemini 3.5 Flash Lite as the primary engine,
  * cascading automatically to Groq (openai/gpt-oss-20b) as Fallback 1,
  * and OpenCode Zen (deepseek-v4-flash-free) as Fallback 2.
  */
@@ -15,10 +15,10 @@ export function createResilientLLM(temperature = 0.2): BaseChatModel {
   const opencodeKey = env.OPENCODE_API_KEY || process.env.OPENCODE_API_KEY || 'opencode-key';
   const opencodeBaseURL = env.OPENCODE_BASE_URL || process.env.OPENCODE_BASE_URL || 'https://opencode.ai/zen/v1';
 
-  // 1. Primary: Google Gemini 3.7 Flash
+  // 1. Primary: Google Gemini 3.5 Flash Lite
   const primary = new ChatGoogleGenerativeAI({
     apiKey: geminiKey,
-    model: 'gemini-3.7-flash',
+    model: 'gemini-3.5-flash-lite',
     temperature,
     maxRetries: 1,
   });
@@ -60,7 +60,7 @@ export function createResilientLLM(temperature = 0.2): BaseChatModel {
 }
 
 /**
- * Returns a capable LLM configured with Gemini 3.7 Flash primary + Groq & DeepSeek fallbacks.
+ * Returns a capable LLM configured with Gemini 3.5 Flash Lite primary + Groq & DeepSeek fallbacks.
  * Default temperature: 0.2 for creative drafting, planning, and repair.
  */
 export function getCapableLLM(options?: { temperature?: number }): BaseChatModel {
@@ -69,7 +69,7 @@ export function getCapableLLM(options?: { temperature?: number }): BaseChatModel
 }
 
 /**
- * Returns a fast/deterministic LLM configured with Gemini 3.7 Flash primary + Groq & DeepSeek fallbacks.
+ * Returns a fast/deterministic LLM configured with Gemini 3.5 Flash Lite primary + Groq & DeepSeek fallbacks.
  * Default temperature: 0.0 for deterministic verification and intake parsing.
  */
 export function getFastLLM(options?: { temperature?: number }): BaseChatModel {
