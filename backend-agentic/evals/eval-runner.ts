@@ -82,9 +82,9 @@ export async function runGoldenEvaluations(options?: { sampleSize?: number; cate
           syllabus: item.syllabus,
           noteType: item.note_type,
           educationLevel: item.education_level,
-          includeExamples: 'yes',
+          includeExamples: 'yes' as const,
           userInstructions: 'Provide rigorous academic definitions and valid LaTeX equations.',
-          format: 'markdown',
+          format: 'markdown' as const,
         };
 
         const finalState = await notesGenerationGraph.invoke(graphInput);

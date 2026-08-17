@@ -8,7 +8,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(8001),
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   OPENCODE_API_KEY: z.string().optional(),
-  OPENCODE_BASE_URL: z.string().default('https://api.opencode.ai/v1'),
+  OPENCODE_BASE_URL: z.string().default('https://opencode.ai/zen/v1'),
   LANGFUSE_PUBLIC_KEY: z.string().optional(),
   LANGFUSE_SECRET_KEY: z.string().optional(),
   LANGFUSE_HOST: z.string().default('https://cloud.langfuse.com'),
@@ -33,7 +33,9 @@ const envSchema = z.object({
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().optional(),
   CORS_ORIGIN: z.string().optional(),
+  ALLOW_PARALLEL_PROCESSING: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(false),
   HEARTBEAT_INTERVAL_MS: z.coerce.number().default(10000),
+
   SWEEPER_STALE_MS: z.coerce.number().default(45000),
   SWEEPER_INTERVAL_MS: z.coerce.number().default(30000),
   MISSION_MAX_RETRIES: z.coerce.number().default(3),

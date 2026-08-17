@@ -29,11 +29,14 @@ export const verifyFirebaseToken = async (req: Request, res: Response, next: Nex
   }
 
   try {
-    if (!admin.apps.length) {
-      if (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') {
+    if (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') {
+      if (token === 'dev-token' || token === 'test-token' || !admin.apps.length) {
         req.user = { uid: 'dev-user', email: 'dev@pandaprep.test' };
         return next();
       }
+    }
+
+    if (!admin.apps.length) {
       logger.error('Firebase Admin not initialized in production environment');
       return res.status(503).json({
         success: false,

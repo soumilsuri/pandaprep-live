@@ -16,6 +16,8 @@ import {
   ISourceUsed,
 } from '../models/notes-workspace.model.js';
 import { logger } from '../config/logger.js';
+import { env } from '../config/env.js';
+
 
 const MAX_SECTION_REPAIRS = 2;
 
@@ -119,42 +121,86 @@ async function writerNode(state: AgentState): Promise<Partial<AgentState>> {
 
   const pendingNodes = state.topicGraph.nodes.filter((n) => !completedSectionIds.has(n.section_id));
 
-  // Draft sections sequentially in topological DAG order to accumulate prerequisite terms & anchors
-  for (const node of pendingNodes) {
-    const scopedSlice = getScopedWorkspaceSlice(
-      {
-        topicGraph: state.topicGraph,
-        styleDecisions: state.styleDecisions,
-        termsDefined: currentTerms,
-        crossReferenceAnchors: currentAnchors,
-      },
-      node.section_id
-    );
+  // Draft sections: parallel if ALLOW_PARALLEL_PROCESSING is enabled, otherwise sequential (1-by-1)
+  if (env.ALLOW_PARALLEL_PROCESSING) {
+    logger.info({ missionId: state.missionId }, 'Processing sections in parallel...');
+    await Promise.all(
+      pendingNodes.map(async (node) => {
+        const scopedSlice = getScopedWorkspaceSlice(
+          {
+            topicGraph: state.topicGraph,
+            styleDecisions: state.styleDecisions,
+            termsDefined: currentTerms,
+            crossReferenceAnchors: currentAnchors,
+          },
+          node.section_id
+        );
 
-    if (!scopedSlice) {
-      logger.warn(
-        { missionId: state.missionId, sectionId: node.section_id },
-        'Section skipped: no scoped workspace slice available for drafting'
+        if (!scopedSlice) {
+          logger.warn(
+            { missionId: state.missionId, sectionId: node.section_id },
+            'Section skipped: no scoped workspace slice available for drafting'
+          );
+          return;
+        }
+
+        logger.info(
+          { missionId: state.missionId, sectionId: node.section_id, title: node.title },
+          'Drafting section (parallel)...'
+        );
+
+        const draftResult = await draftSection({
+          subject_name: state.subjectName,
+          scoped_slice: scopedSlice,
+        });
+
+        generatedSections[node.section_id] = draftResult.section;
+        currentTerms.push(...draftResult.new_terms_defined);
+        currentAnchors.push(...draftResult.new_anchors);
+        currentSources[node.section_id] = draftResult.sources_used;
+        completedSectionIds.add(node.section_id);
+      })
+    );
+  } else {
+    // Draft sections sequentially (1-by-1) in topological order
+    logger.info({ missionId: state.missionId }, 'Processing sections sequentially (1-by-1)...');
+    for (const node of pendingNodes) {
+      const scopedSlice = getScopedWorkspaceSlice(
+        {
+          topicGraph: state.topicGraph,
+          styleDecisions: state.styleDecisions,
+          termsDefined: currentTerms,
+          crossReferenceAnchors: currentAnchors,
+        },
+        node.section_id
       );
-      continue;
+
+      if (!scopedSlice) {
+        logger.warn(
+          { missionId: state.missionId, sectionId: node.section_id },
+          'Section skipped: no scoped workspace slice available for drafting'
+        );
+        continue;
+      }
+
+      logger.info(
+        { missionId: state.missionId, sectionId: node.section_id, title: node.title },
+        'Drafting section (sequential)...'
+      );
+
+      const draftResult = await draftSection({
+        subject_name: state.subjectName,
+        scoped_slice: scopedSlice,
+      });
+
+      generatedSections[node.section_id] = draftResult.section;
+      currentTerms = [...currentTerms, ...draftResult.new_terms_defined];
+      currentAnchors = [...currentAnchors, ...draftResult.new_anchors];
+      currentSources[node.section_id] = draftResult.sources_used;
+      completedSectionIds.add(node.section_id);
     }
-
-    logger.info(
-      { missionId: state.missionId, sectionId: node.section_id, title: node.title },
-      'Drafting section...'
-    );
-
-    const draftResult = await draftSection({
-      subject_name: state.subjectName,
-      scoped_slice: scopedSlice,
-    });
-
-    generatedSections[node.section_id] = draftResult.section;
-    currentTerms = [...currentTerms, ...draftResult.new_terms_defined];
-    currentAnchors = [...currentAnchors, ...draftResult.new_anchors];
-    currentSources[node.section_id] = draftResult.sources_used;
-    completedSectionIds.add(node.section_id);
   }
+
 
   const updatedChecklist = state.coverageChecklist.map((item) => {
     if (completedSectionIds.has(item.mapped_section_id)) {

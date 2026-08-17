@@ -6,6 +6,10 @@ export const BASE_URL = process.env.NEXT_PUBLIC_PROD_BASE_URL
   ? `${process.env.NEXT_PUBLIC_PROD_BASE_URL}api`
   : "http://localhost:8000/api";
 
+export const AGENTIC_BASE_URL =
+  process.env.NEXT_PUBLIC_AGENTIC_BASE_URL || "http://localhost:8001/api";
+
+
 
 export const faqs = [
   {

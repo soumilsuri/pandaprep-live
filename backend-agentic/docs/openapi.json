@@ -1,0 +1,1457 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PandaPrep Bounded Agentic Backend API",
+    "version": "1.0.0",
+    "description": "Production REST API specification for PandaPrep's Bounded Agentic Backend.\nProvides autonomous revision notes synthesis via bounded DAG workflows, multi-turn grounded Q&A, and real-time operational observability metrics.\n"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8001",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://pandaprep-live.vercel.app",
+      "description": "Production API Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Service liveness and database connection status checks"
+    },
+    {
+      "name": "Pipeline",
+      "description": "Long-running asynchronous notes synthesis pipeline and generation lifecycle"
+    },
+    {
+      "name": "Chat",
+      "description": "Multi-turn grounded Q&A over generated notes workspaces"
+    },
+    {
+      "name": "Observability",
+      "description": "Operational health metrics, repair rate benchmarks, and latency percentiles"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Get system health status",
+        "description": "Returns service liveness, uptime, and current MongoDB connection state.",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Service is healthy and database is connected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "healthy": {
+                    "value": {
+                      "status": "healthy",
+                      "timestamp": "2026-08-17T01:00:00.000Z",
+                      "database": "connected",
+                      "uptimeSeconds": 1542.8
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is degraded (database disconnected or connecting).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "examples": {
+                  "degraded": {
+                    "value": {
+                      "status": "degraded",
+                      "timestamp": "2026-08-17T01:00:00.000Z",
+                      "database": "disconnected",
+                      "uptimeSeconds": 1542.8
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Get system health status (Namespaced)",
+        "description": "Alias for `/health` mounted under `/api`.",
+        "operationId": "getApiHealth",
+        "responses": {
+          "200": {
+            "description": "Service is healthy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is degraded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pipeline/generate-notes": {
+      "post": {
+        "tags": [
+          "Pipeline"
+        ],
+        "summary": "Enqueue autonomous revision notes synthesis",
+        "description": "Validates the request payload, initializes the database records (`UserRequest` and `Mission`),\nand enqueues the task for asynchronous worker execution through the bounded agentic DAG.\n",
+        "operationId": "generateNotes",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateNotesRequest"
+              },
+              "examples": {
+                "dbmsRevision": {
+                  "summary": "DBMS Revision Notes Request",
+                  "value": {
+                    "email": "student@example.com",
+                    "subject_name": "Database Management Systems",
+                    "syllabus": "Unit 1: Relational Algebra & SQL\nUnit 2: Normalization (1NF to BCNF)\nUnit 3: Transactions & ACID",
+                    "note_type": "detailed",
+                    "include_examples": "yes",
+                    "include_images": "no",
+                    "education_level": "intermediate",
+                    "user_instructions": "Emphasize normalization anomalies and ACID isolation levels.",
+                    "format": "markdown"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Mission successfully queued for processing.",
+            "headers": {
+              "X-Correlation-ID": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Request correlation identifier"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateNotesResponse"
+                },
+                "examples": {
+                  "queued": {
+                    "value": {
+                      "success": true,
+                      "message": "Notes generation queued",
+                      "requestId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+                      "jobId": "66bf744b1c8f12a3456789ab",
+                      "estimatedTimeSeconds": 45
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid Firebase Bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (Max 10 requests per 5 minutes).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pipeline/generation-status/{requestId}": {
+      "get": {
+        "tags": [
+          "Pipeline"
+        ],
+        "summary": "Poll revision notes generation status",
+        "description": "Retrieves the current execution status, generated markdown output, download URL,\nor failure details for a previously submitted `requestId`.\n",
+        "operationId": "getGenerationStatus",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "description": "The unique UUID assigned during notes generation intake.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current lifecycle status of the requested notes generation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationStatusResponse"
+                },
+                "examples": {
+                  "processing": {
+                    "summary": "Task in progress",
+                    "value": {
+                      "success": true,
+                      "status": "processing",
+                      "error": null,
+                      "markdown": null,
+                      "processingTimeMs": null
+                    }
+                  },
+                  "completed": {
+                    "summary": "Generation complete",
+                    "value": {
+                      "success": true,
+                      "status": "completed",
+                      "error": null,
+                      "markdown": "# Database Management Systems Revision Notes\n\n## Section 1: Relational Algebra...",
+                      "downloadUrl": null,
+                      "processingTimeMs": 28450
+                    }
+                  },
+                  "failed": {
+                    "summary": "Generation failed",
+                    "value": {
+                      "success": true,
+                      "status": "failed",
+                      "error": "Upstream LLM provider quota exhausted",
+                      "markdown": null,
+                      "processingTimeMs": 14200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid requestId parameter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notes request not found or not owned by user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "success": false,
+                      "error": "Notes request not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pipeline/metrics": {
+      "get": {
+        "tags": [
+          "Observability"
+        ],
+        "summary": "Retrieve operational pipeline health & quality metrics",
+        "description": "Returns aggregated agent loop metrics, section repair rates, checklist exhaustion rates,\np50/p95/p99 latency percentiles, active worker heartbeats, and SLA health status.\n",
+        "operationId": "getPipelineMetrics",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "window",
+            "in": "query",
+            "required": false,
+            "description": "Time window filter for metric aggregation.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1h",
+                "24h",
+                "7d",
+                "30d",
+                "all"
+              ],
+              "default": "all",
+              "example": "24h"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operational health metrics successfully calculated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineMetricsResponse"
+                },
+                "examples": {
+                  "healthyOperationalMetrics": {
+                    "value": {
+                      "success": true,
+                      "timestamp": "2026-08-17T01:00:00.000Z",
+                      "window": "24h",
+                      "metrics": {
+                        "section_repair_rate_percent": 6.25,
+                        "checklist_exhaustion_rate_percent": 0,
+                        "average_dag_nodes": 10.4,
+                        "latency": {
+                          "p50_latency_ms": 21500,
+                          "p95_latency_ms": 38400,
+                          "p99_latency_ms": 41200
+                        },
+                        "active_worker_count": 2,
+                        "sample_sizes": {
+                          "total_workspaces": 16,
+                          "total_drafted_sections": 160,
+                          "repaired_sections": 10,
+                          "completed_requests": 16
+                        },
+                        "targets": {
+                          "section_repair_rate_percent": "< 15%",
+                          "checklist_exhaustion_rate_percent": "< 3%",
+                          "average_dag_nodes": "8 to 14",
+                          "p95_latency_ms": "< 45000"
+                        },
+                        "status": "healthy"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (Max 60 requests per 1 minute).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/chat-with-notes": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Grounded Q&A over generated notes workspace",
+        "description": "Submits a student query grounded strictly against the generated workspace notes,\nterminology definitions, and syllabus graph. Automatically persists multi-turn dialogue history.\n",
+        "operationId": "chatWithNotes",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              },
+              "examples": {
+                "dijkstraQuery": {
+                  "summary": "Graph query on Dijkstra's algorithm",
+                  "value": {
+                    "missionId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+                    "query": "What is the concept of relaxation in Dijkstra algorithm and what is its time complexity?"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "QA agent response generated and history persisted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                },
+                "examples": {
+                  "groundedAnswer": {
+                    "value": {
+                      "success": true,
+                      "reply": "**Relaxation** updates distance estimates when shorter paths are found. Time complexity is O((V + E) log V).",
+                      "response": "**Relaxation** updates distance estimates when shorter paths are found. Time complexity is O((V + E) log V).",
+                      "sources": [
+                        "Section 2: Dijkstra Algorithm"
+                      ],
+                      "suggested_followups": [
+                        "Explain how priority queues optimize Dijkstra",
+                        "What occurs if edge weights are negative?"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Revision notes or workspace not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "success": false,
+                      "error": "Revision notes not found for the specified ID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded (Max 30 requests per 5 minutes).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/message": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Grounded Q&A over generated notes (Route Alias)",
+        "description": "Alias endpoint for `/api/chat/chat-with-notes`.",
+        "operationId": "chatMessageAlias",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "QA agent response generated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Revision notes not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/history/{missionId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Retrieve paginated chat history",
+        "description": "Retrieves the stored multi-turn conversation history for a given mission ID.",
+        "operationId": "getChatHistory",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "missionId",
+            "in": "path",
+            "required": true,
+            "description": "The missionId (or requestId) of the notes workspace.",
+            "schema": {
+              "type": "string",
+              "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of messages to return (Max 200).",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 200,
+              "example": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of messages to skip.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "example": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/CorrelationIdHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated chat history messages.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatHistoryResponse"
+                },
+                "examples": {
+                  "history": {
+                    "value": {
+                      "success": true,
+                      "mission_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+                      "messages": [
+                        {
+                          "role": "user",
+                          "content": "What is relaxation in Dijkstra algorithm?",
+                          "timestamp": "2026-08-17T01:05:00.000Z"
+                        },
+                        {
+                          "role": "assistant",
+                          "content": "Relaxation is the process of lowering distance estimates...",
+                          "sources": [
+                            {
+                              "section": "Section 2: Dijkstra Algorithm"
+                            }
+                          ],
+                          "timestamp": "2026-08-17T01:05:04.000Z"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing missionId parameter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Firebase Authentication ID Token (JWT).\nIn development/test mode without Firebase credentials configured, any non-empty string is accepted and assigns the mock identity `dev-user`.\n"
+      }
+    },
+    "parameters": {
+      "CorrelationIdHeader": {
+        "name": "X-Correlation-ID",
+        "in": "header",
+        "required": false,
+        "description": "Optional distributed tracing correlation identifier. If omitted, the server generates a UUIDv4.",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "3f0b2f51-24b5-4b20-91bf-54848a60de56"
+        }
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "timestamp",
+          "database",
+          "uptimeSeconds"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "degraded"
+            ],
+            "description": "Overall operational health state.",
+            "example": "healthy"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of the health check invocation.",
+            "example": "2026-08-17T01:00:00.000Z"
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "disconnected",
+              "connecting",
+              "disconnecting",
+              "unknown"
+            ],
+            "description": "MongoDB connection state.",
+            "example": "connected"
+          },
+          "uptimeSeconds": {
+            "type": "number",
+            "description": "Node.js process uptime in seconds.",
+            "example": 1845.2
+          }
+        }
+      },
+      "GenerateNotesRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "syllabus",
+          "subject_name"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Recipient email address for completion notifications.",
+            "example": "student@example.com"
+          },
+          "syllabus": {
+            "type": "string",
+            "minLength": 5,
+            "description": "Raw syllabus text or curriculum topics to structure and synthesize.",
+            "example": "Unit 1: Relational Algebra\nUnit 2: Normalization (1NF, 2NF, 3NF, BCNF)\nUnit 3: Transactions & ACID"
+          },
+          "subject_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the academic subject or exam module.",
+            "example": "Database Management Systems"
+          },
+          "note_type": {
+            "type": "string",
+            "enum": [
+              "concise",
+              "detailed",
+              "qa"
+            ],
+            "default": "detailed",
+            "description": "Target depth and structure of generated revision notes.",
+            "example": "detailed"
+          },
+          "include_examples": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "default": "no",
+            "description": "Whether to generate explicit step-by-step worked examples.",
+            "example": "yes"
+          },
+          "include_images": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "default": "no",
+            "description": "Flag for diagrams/image generation (currently ignored by agent engine).",
+            "example": "no"
+          },
+          "education_level": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "default": "intermediate",
+            "description": "Target audience comprehension depth.",
+            "example": "intermediate"
+          },
+          "user_instructions": {
+            "type": "string",
+            "default": "",
+            "description": "Custom user directives and focal points for the AI intake agent.",
+            "example": "Emphasize normalization anomalies and practical SQL queries."
+          },
+          "relativePathToReferenceMaterial": {
+            "type": "string",
+            "default": "",
+            "description": "Optional workspace relative path for custom reference docs.",
+            "example": ""
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "pdf"
+            ],
+            "default": "markdown",
+            "description": "Output format (PDF is mapped to Markdown in agent backend).",
+            "example": "markdown"
+          }
+        }
+      },
+      "GenerateNotesResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "requestId",
+          "jobId",
+          "estimatedTimeSeconds"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Notes generation queued"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique tracking UUID for polling and multi-turn chat.",
+            "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+          },
+          "jobId": {
+            "type": "string",
+            "description": "MongoDB ObjectId string of the queued mission document.",
+            "example": "66bf744b1c8f12a3456789ab"
+          },
+          "estimatedTimeSeconds": {
+            "type": "integer",
+            "description": "Estimated duration in seconds for full synthesis pipeline completion.",
+            "example": 45
+          }
+        }
+      },
+      "GenerationStatusResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "status",
+          "error",
+          "markdown",
+          "processingTimeMs"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "processing",
+              "completed",
+              "failed"
+            ],
+            "description": "Current lifecycle status of notes generation.",
+            "example": "completed"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error message if status is 'failed', otherwise null.",
+            "example": null
+          },
+          "markdown": {
+            "type": "string",
+            "nullable": true,
+            "description": "Complete generated revision notes markdown document when completed.",
+            "example": "# Database Management Systems\n\n## Section 1: Relational Algebra..."
+          },
+          "downloadUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional secure Cloudinary / CDN download URL if published.",
+            "example": null
+          },
+          "processingTimeMs": {
+            "type": "number",
+            "nullable": true,
+            "description": "Total wall-clock processing time in milliseconds.",
+            "example": 24150
+          }
+        }
+      },
+      "PipelineMetricsResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "timestamp",
+          "window",
+          "metrics"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-08-17T01:00:00.000Z"
+          },
+          "window": {
+            "type": "string",
+            "enum": [
+              "1h",
+              "24h",
+              "7d",
+              "30d",
+              "all"
+            ],
+            "example": "24h"
+          },
+          "metrics": {
+            "type": "object",
+            "required": [
+              "section_repair_rate_percent",
+              "checklist_exhaustion_rate_percent",
+              "average_dag_nodes",
+              "latency",
+              "active_worker_count",
+              "sample_sizes",
+              "targets",
+              "status"
+            ],
+            "properties": {
+              "section_repair_rate_percent": {
+                "type": "number",
+                "description": "Percentage of drafted sections that required self-correction repairs.",
+                "example": 6.25
+              },
+              "checklist_exhaustion_rate_percent": {
+                "type": "number",
+                "description": "Percentage of workspaces completing with outstanding checklist gaps.",
+                "example": 0
+              },
+              "average_dag_nodes": {
+                "type": "number",
+                "description": "Average number of nodes in generated topic DAGs.",
+                "example": 10.4
+              },
+              "latency": {
+                "type": "object",
+                "required": [
+                  "p50_latency_ms",
+                  "p95_latency_ms",
+                  "p99_latency_ms"
+                ],
+                "properties": {
+                  "p50_latency_ms": {
+                    "type": "number",
+                    "example": 21500
+                  },
+                  "p95_latency_ms": {
+                    "type": "number",
+                    "example": 38400
+                  },
+                  "p99_latency_ms": {
+                    "type": "number",
+                    "example": 41200
+                  }
+                }
+              },
+              "active_worker_count": {
+                "type": "integer",
+                "description": "Number of unique workers that reported heartbeats within the last 30s.",
+                "example": 2
+              },
+              "sample_sizes": {
+                "type": "object",
+                "required": [
+                  "total_workspaces",
+                  "total_drafted_sections",
+                  "repaired_sections",
+                  "completed_requests"
+                ],
+                "properties": {
+                  "total_workspaces": {
+                    "type": "integer",
+                    "example": 16
+                  },
+                  "total_drafted_sections": {
+                    "type": "integer",
+                    "example": 160
+                  },
+                  "repaired_sections": {
+                    "type": "integer",
+                    "example": 10
+                  },
+                  "completed_requests": {
+                    "type": "integer",
+                    "example": 16
+                  }
+                }
+              },
+              "targets": {
+                "type": "object",
+                "required": [
+                  "section_repair_rate_percent",
+                  "checklist_exhaustion_rate_percent",
+                  "average_dag_nodes",
+                  "p95_latency_ms"
+                ],
+                "properties": {
+                  "section_repair_rate_percent": {
+                    "type": "string",
+                    "example": "< 15%"
+                  },
+                  "checklist_exhaustion_rate_percent": {
+                    "type": "string",
+                    "example": "< 3%"
+                  },
+                  "average_dag_nodes": {
+                    "type": "string",
+                    "example": "8 to 14"
+                  },
+                  "p95_latency_ms": {
+                    "type": "string",
+                    "example": "< 45000"
+                  }
+                }
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "healthy",
+                  "degraded"
+                ],
+                "description": "Overall system operational SLA evaluation status.",
+                "example": "healthy"
+              }
+            }
+          }
+        }
+      },
+      "ChatRequest": {
+        "type": "object",
+        "properties": {
+          "missionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Mission ID or Request ID of the target generated notes workspace.",
+            "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Alias for missionId.",
+            "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Student question to answer based on the notes workspace.",
+            "example": "What is relaxation in Dijkstra algorithm and what is its complexity?"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Alias for query.",
+            "example": "What is relaxation in Dijkstra algorithm and what is its complexity?"
+          }
+        }
+      },
+      "ChatResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "reply",
+          "sources",
+          "suggested_followups"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "reply": {
+            "type": "string",
+            "description": "Grounded markdown answer produced by the Q&A Agent.",
+            "example": "**Relaxation** updates shortest distances when improved paths are discovered. Complexity is O((V + E) log V)."
+          },
+          "response": {
+            "type": "string",
+            "description": "Backward-compatible alias for reply.",
+            "example": "**Relaxation** updates shortest distances when improved paths are discovered. Complexity is O((V + E) log V)."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of section titles / citations referenced in formulating the response.",
+            "example": [
+              "Section 2: Dijkstra Algorithm"
+            ]
+          },
+          "suggested_followups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Follow-up study queries suggested for interactive revision.",
+            "example": [
+              "Explain how priority queues optimize Dijkstra",
+              "What happens with negative edge weights?"
+            ]
+          }
+        }
+      },
+      "ChatHistoryMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content",
+          "timestamp"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant",
+              "system"
+            ],
+            "example": "user"
+          },
+          "content": {
+            "type": "string",
+            "example": "What is relaxation in Dijkstra algorithm?"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "section": {
+                  "type": "string"
+                },
+                "snippet": {
+                  "type": "string"
+                }
+              }
+            },
+            "example": [
+              {
+                "section": "Section 2: Dijkstra Algorithm"
+              }
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-08-17T01:05:00.000Z"
+          }
+        }
+      },
+      "ChatHistoryResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "mission_id",
+          "messages"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "mission_id": {
+            "type": "string",
+            "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatHistoryMessage"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "error"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "description": "User-friendly high-level error message.",
+            "example": "Unauthorized: No authorization token provided"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "error",
+          "details"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Invalid request payload"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "formErrors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": []
+              },
+              "fieldErrors": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "email": [
+                    "Invalid email"
+                  ],
+                  "syllabus": [
+                    "Syllabus must be at least 5 characters"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "RateLimitErrorResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "error",
+          "message"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Too Many Requests"
+          },
+          "message": {
+            "type": "string",
+            "example": "Rate limit of 10 requests per 5 minutes exceeded. Please retry later."
+          }
+        }
+      }
+    }
+  }
+}

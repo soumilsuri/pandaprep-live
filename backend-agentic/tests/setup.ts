@@ -30,7 +30,7 @@ for (const key of [
 
 process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/pandaprep-test';
 
-const mongoUri = inject<string>('mongoUri') || process.env.TEST_MONGODB_URI;
+const mongoUri = (inject as unknown as (key: string) => string | undefined)('mongoUri') || process.env.TEST_MONGODB_URI;
 if (mongoUri) {
   process.env.MONGODB_URI = mongoUri;
 }
@@ -38,6 +38,7 @@ if (mongoUri) {
 vi.mock('../../src/agents/llm.js', async () => {
   const { fakeLLM } = await import('./mocks/fake-llm.js');
   return {
+    createResilientLLM: () => fakeLLM,
     getCapableLLM: () => fakeLLM,
     getFastLLM: () => fakeLLM,
     getLLM: () => fakeLLM,

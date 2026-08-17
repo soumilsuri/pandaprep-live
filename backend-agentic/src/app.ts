@@ -13,7 +13,7 @@ app.disable('x-powered-by');
 
 const allowedOrigins = env.CORS_ORIGIN
   ? env.CORS_ORIGIN.split(',').map((o) => o.trim())
-  : ['http://localhost:3000', 'http://localhost:5173', 'https://pandaprep.tech', 'https://pandaprepai.tech'];
+  : ['http://localhost:3000', 'http://localhost:5173', 'https://pandaprep.tech', 'https://pandaprepai.tech', 'https://pandaprep-live.vercel.app'];
 
 app.use(
   cors({
