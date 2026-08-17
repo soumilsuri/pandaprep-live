@@ -1,0 +1,37 @@
+{
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "root": "backend"
+    },
+    "backend-agentic": {
+      "root": "backend-agentic"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/agentic(/.*)?",
+      "destination": {
+        "type": "service",
+        "service": "backend-agentic"
+      }
+    },
+    {
+      "source": "/api/backend(/.*)?",
+      "destination": {
+        "type": "service",
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "frontend"
+      }
+    }
+  ]
+}
