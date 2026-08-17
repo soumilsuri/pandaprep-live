@@ -24,11 +24,11 @@ pandaprep-live/
 
 ### Service Breakdown
 
-| Service | Technology | Role & Key Responsibilities |
-|---|---|---|
-| **`frontend`** | Next.js 15, React 19, TailwindCSS, KaTeX | Responsive student portal, interactive Markdown/LaTeX viewer, real-time generation polling, client-side vector PDF generation (`window.print()`). |
+| Service               | Technology                                       | Role & Key Responsibilities                                                                                                                                                          |
+| --------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`frontend`**        | Next.js 15, React 19, TailwindCSS, KaTeX         | Responsive student portal, interactive Markdown/LaTeX viewer, real-time generation polling, client-side vector PDF generation (`window.print()`).                                    |
 | **`backend-agentic`** | TypeScript, LangGraph.js, Express, MongoDB Atlas | Bounded stateful agent pipeline: **Intake** $\to$ **Planner DAG** $\to$ **Scoped Writers** $\to$ **Verifier (6 contract checks)** $\to$ **Targeted Repair Loop** $\to$ **Finalize**. |
-| **`backend`** | Node.js, Express, Mongoose, Razorpay SDK | User authentication checks, subscription credits, payment webhooks, and PDF upload to Cloudinary. |
+| **`backend`**         | Node.js, Express, Mongoose, Razorpay SDK         | User authentication checks, subscription credits, payment webhooks, and PDF upload to Cloudinary.                                                                                    |
 
 ---
 
@@ -36,19 +36,10 @@ pandaprep-live/
 
 Unlike traditional linear automation scripts, PandaPrep executes a **bounded stateful agent graph** powered by LangGraph.js and MongoDB Atlas checkpoints:
 
-```mermaid
-flowchart TD
-    Start([Student Syllabus + Preferences]) --> Intake[1. Intake Resolution Agent]
-    Intake --> Planner[2. Planner Agent: DAG & Coverage Checklist]
-    Planner --> Writer[3. Concurrent Section Writers with Shared Memory]
-    Writer --> Verifier[4. Verifier Agent: 6 Contract Checks]
-    Verifier -- Fail (Iterations < 2) --> Repair[5. Targeted Section Repair Pass]
-    Repair --> Verifier
-    Verifier -- Pass / Bounds Met --> Finalize[6. Finalize: Table of Contents & LaTeX Validation]
-    Finalize --> Delivery([Markdown Saved to MongoDB & Delivered to Student])
-```
+![PandaPrep Agentic Architecture](./architecture.png)
 
 ### Resilient Multi-Provider LLM Tiering
+
 1. **Primary**: Google Gemini (`gemini-3.5-flash-lite`)
 2. **Fallback 1**: Groq (`openai/gpt-oss-20b`)
 3. **Fallback 2**: OpenCode Zen (`deepseek-v4-flash-free`)
@@ -59,13 +50,15 @@ flowchart TD
 ## 🚀 Getting Started (Local Development)
 
 ### Prerequisites
-* Node.js v20+
-* MongoDB Atlas Cluster (Free Tier M0 or higher)
-* API Keys for Gemini, Firebase, and optional observability (Langfuse)
+
+- Node.js v20+
+- MongoDB Atlas Cluster (Free Tier M0 or higher)
+- API Keys for Gemini, Firebase, and optional observability (Langfuse)
 
 ### 1. Setup Environment Variables
 
-* **Frontend**: Create `frontend/.env.local`
+- **Frontend**: Create `frontend/.env.local`
+
   ```env
   NEXT_PUBLIC_FIREBASE_API_KEY="AIza..."
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pandaprep-22edc.firebaseapp.com"
@@ -75,7 +68,8 @@ flowchart TD
   NEXT_PUBLIC_AGENTIC_BASE_URL="http://localhost:8001/api"
   ```
 
-* **Agentic Backend**: Create `backend-agentic/.env`
+- **Agentic Backend**: Create `backend-agentic/.env`
+
   ```env
   PORT=8001
   NODE_ENV=development
@@ -87,7 +81,7 @@ flowchart TD
   LANGFUSE_HOST="https://cloud.langfuse.com"
   ```
 
-* **Legacy Backend**: Create `backend/.env`
+- **Legacy Backend**: Create `backend/.env`
   ```env
   PORT=8000
   MONGODB_URI="mongodb+srv://<user>:<pass>@cluster.mongodb.net/pandaprep"
@@ -119,9 +113,9 @@ npm install
 npm run dev
 ```
 
-* Frontend runs on `http://localhost:3000`
-* Agentic Backend runs on `http://localhost:8001`
-* Legacy Backend runs on `http://localhost:8000`
+- Frontend runs on `http://localhost:3000`
+- Agentic Backend runs on `http://localhost:8001`
+- Legacy Backend runs on `http://localhost:8000`
 
 ---
 
@@ -149,4 +143,5 @@ PandaPrep is configured for zero-friction Vercel deployment:
 ---
 
 ## 📄 License
+
 ISC License. Built for students with ❤️ by Team PandaPrep.
