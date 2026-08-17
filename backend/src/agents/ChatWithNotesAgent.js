@@ -268,7 +268,7 @@ ${doc.pageContent.trim()}
       // Generate response
       console.log('Generating response...');
       const response = await genAI.models.generateContent({
-        model: 'gemini-2.0-flash-lite',
+        model: 'gemini-3.5-flash-lite',
         contents: contents,
       });
 
@@ -339,7 +339,7 @@ ${doc.pageContent.trim()}
       // Generate streaming response
       console.log('Generating streaming response...');
       const response = await genAI.models.generateContentStream({
-        model: 'gemini-2.0-flash-lite',
+        model: 'gemini-3.5-flash-lite',
         contents: contents,
       });
 
