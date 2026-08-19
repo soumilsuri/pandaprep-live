@@ -258,12 +258,68 @@ Post-delivery revision assistant tool suite:
 ## 16. Observability & Telemetry
 
 - **Correlation IDs**: `requestId` (UUID v4) threaded through every log, LLM invocation, and database update.
-- **Structured JSON Logs**: Winston/Pino structured logging with timestamps and stages.
-- **Agent Run Tracing**: Node transitions, tool calls, and verifier audits persisted in MongoDB.
+- **Structured JSON Logs**: Winston/Pino structured logging with ISO timestamps and pipeline execution stages.
+- **Agent Run Tracing**: Node transitions, tool calls, and verifier audits persisted in MongoDB with Langfuse telemetry integration.
+- **Operational Health Metrics**: Real-time aggregation of active missions, P95 generation latency, repair loop rates, and token consumption via `/api/admin/metrics/health`.
 
 ---
 
-## 17. Security & Boundary Defenses
+## 17. Evaluation Framework & Quality Benchmarks (Online vs. Offline Evals)
+
+To guarantee academic rigor and prevent prompt or model regressions, PandaPrep implements a **Dual-Loop Evaluation System** combining real-time online verification with pre-deployment CI/CD regression gating.
+
+```text
+               ┌────────────────────────────────────────────────────────┐
+               │         PANDAPREP DUAL-LOOP EVALUATION SYSTEM          │
+               └────────────────────────────────────────────────────────┘
+                                     │
+            ┌────────────────────────┴────────────────────────┐
+            ▼                                                 ▼
+┌──────────────────────────────────────┐  ┌──────────────────────────────────────┐
+│ OFFLINE CI/CD REGRESSION GATE        │  │ ONLINE LIVE PRODUCTION AUDITING      │
+│ • Runs via `npm run test:evals`      │  │ • Verifier audits 100% of live notes │
+│ • 20 Diverse Golden Syllabi          │  │ • 6 contract checks in StateGraph    │
+│ • Blocks PR if Q_aggregate < 95%     │  │ • Logs audits in `notes_workspaces`  │
+│ • Fails on > 2% score regression     │  │ • Edge cases feed back into dataset  │
+└──────────────────────────────────────┘  └──────────────────────────────────────┘
+```
+
+### 17.1 Core Evaluation Dimensions & Scoring Rubric
+
+The evaluation engine (`backend-agentic/evals/scoring.ts`) computes scores on four orthogonal axes ($0.0 \le S \le 1.0$):
+
+| Dimension | Metric | Measurement Method | Target Threshold |
+|---|---|---|---|
+| **Completeness** | $S_{comp}$ | Programmatic verification of `coverage_checklist` mapping, expected keyword presence, and zero unresolved gaps. | **$\ge 0.95$ (95%)** |
+| **Faithfulness** | $S_{faith}$ | Grounding verification confirming claims trace back to retrieved source chunks (`sources_used`) with zero ungrounded assertions. | **$\ge 0.92$ (92%)** |
+| **Coherence** | $S_{cohere}$ | Semantic consistency auditing unique term definitions (`terms_defined`) and bidirectional anchor resolution (`cross_reference_anchors`). | **$\ge 0.95$ (95%)** |
+| **LaTeX & Syntax** | $S_{syntax}$ | Deterministic balanced-stack parser (`checkLatexSyntax`) validating `$`, `$$`, and `\begin{env}...\end{env}` blocks. | **$1.00$ (0 errors)** |
+
+### 17.2 Composite Quality Score Formula ($Q_i$)
+
+Every generated note receives a composite quality score calculated as:
+
+$$Q_i = (0.35 \cdot S_{comp} + 0.25 \cdot S_{faith} + 0.20 \cdot S_{cohere} + 0.20 \cdot S_{syntax}) \times 100$$
+
+For a benchmark suite of $N$ syllabi, the aggregate score is:
+
+$$Q_{aggregate} = \frac{1}{N} \sum_{i=1}^{N} Q_i$$
+
+### 17.3 Offline Golden Benchmark Suite (`backend-agentic/evals/`)
+
+- **20 Curated Golden Syllabi** (`golden-syllabi.json`): Diverse corpus spanning STEM, Humanities, Law, Medicine, and Economics (e.g., *Dynamic Programming*, *Reaction Mechanisms*, *Carnot Heat Engines*, *Constitutional Law*, *Renal Physiology*).
+- **Automated Test Harness** (`eval-runner.ts` / `npm run test:evals`): Executes the end-to-end StateGraph, calculates per-syllabus and aggregate metrics, and prints structured evaluation tables.
+- **CI/CD Quality Gate**: Enforces $Q_{aggregate} \ge 95.0\%$ with a strict zero-regression rule (fails if aggregate score drops by $> 2\%$ versus `main`).
+
+### 17.4 LLM-as-a-Judge Methodology & Bias Mitigation
+
+- **Self-Grading Bias Mitigation**: The Verifier and offline judge operate under strict role isolation (zero-temperature $T=0.0$, adversarial auditor persona, isolated context window) decoupled from the creative Writer agent.
+- **Anchored 1–5 Rubrics**: Scoring uses discrete behavioral definitions (e.g., Score 5 requires 100% coverage, prerequisite term reuse, valid LaTeX, and zero unsupported claims) rather than subjective Likert ratings.
+- **Position & Length Bias Defenses**: Slices are evaluated in forward and reverse sequence, with length penalties normalized against syllabus density.
+
+---
+
+## 18. Security & Boundary Defenses
 
 - Scoped CORS and default-deny authentication with Firebase Admin.
 - Strict Zod/JSON-Schema validation on all agent structured outputs before updating workspace state.
@@ -272,17 +328,18 @@ Post-delivery revision assistant tool suite:
 
 ---
 
-## 18. Phased Implementation Roadmap
+## 19. Phased Implementation Roadmap
 
 1. **Phase 1: TypeScript Runtime & Mongo Queue** (`backend-agentic` setup, LangGraph.js, `MissionModel`, atomic claims, heartbeats).
 2. **Phase 2: Planner, Notes Workspace & Writers** (`NotesWorkspaceModel`, DAG Planner, scoped Writer concurrency).
 3. **Phase 3: Verifier & Bounded Repair** (6-point contract checker, targeted repair loops, `outstanding_gaps`).
 4. **Phase 4: Tool Registry & Frontend Markdown Reader** (Tavily search, MongoDB markdown storage, Next.js `<MarkdownViewer />`, `window.print()` CSS).
 5. **Phase 5: Interactive Q&A Agent** (Tool-using Q&A agent with persisted chat history in MongoDB).
+6. **Phase 6: Observability, Telemetry & Automated Evals** (Langfuse tracing, `/api/admin/metrics`, 20 Golden Syllabi CI/CD evaluation runner via `npm run test:evals`).
 
 ---
 
-## 19. Architectural Comparison
+## 20. Architectural Comparison
 
 | Concern | Legacy Monolith | Intermediate Redesign (`redesign.md`) | Final Agentic Architecture (`backend-agentic`) |
 |---|---|---|---|
@@ -290,6 +347,7 @@ Post-delivery revision assistant tool suite:
 | **Syllabus Analysis** | One-shot topic grouping | One-shot topic grouping | **Topic Graph DAG + Coverage Checklist** |
 | **Section Generation** | Isolated sequential calls | Isolated parallel calls | **Shared Notes Workspace (Memory across sections)** |
 | **Self-Correction** | None | None | **Verifier Agent + Bounded Repair Loop (max 2)** |
+| **Quality Evaluation** | None (untested output) | Manual spot-checking | **Dual-Loop Evals: Online Verifier + 20 Golden Syllabi CI/CD ($Q \ge 95\%$)** |
 | **PDF & Notes Output** | External Azure `md-to-pdf` microservice | External Azure `md-to-pdf` microservice | **Pure Markdown in MongoDB + Browser `window.print()`** |
 | **Notes Storage** | Cloudinary (1–2 MB PDF per note) | Cloudinary (1–2 MB PDF per note) | **MongoDB Atlas (~18 KB Markdown text per note)** |
 | **Queue & State** | In-memory JS array (`MAX_CONCURRENT_JOBS=1`)| BullMQ + Redis | **MongoDB Atlas Atomic Claim (`findOneAndUpdate`)** |
@@ -300,11 +358,12 @@ Post-delivery revision assistant tool suite:
 
 ---
 
-## 20. Evolution & Architectural Decisions
+## 21. Evolution & Architectural Decisions
 
 ### Key Decisions Accepted:
 - **Markdown-First & Client-Side PDF (`window.print()`)**: Eliminates the heavy `md-to-pdf` microservice and Cloudinary PDF storage. Storing Markdown text in MongoDB is 50x lighter (~18 KB), eliminates 25s of rendering latency, and gives students a Claude-style interactive reader.
 - **Concrete Notes Workspace Schema**: Structured state tracking `topic_graph`, `coverage_checklist`, `terms_defined`, `cross_reference_anchors`, and `final_markdown`.
 - **LangGraph.js & TypeScript**: Native StateGraph execution with MongoDB checkpoint persistence.
+- **Dual-Loop Evals & Quality Gates**: Online Verifier agent in the StateGraph plus 20-syllabi offline CI/CD regression suite (`npm run test:evals`) enforcing $Q_{aggregate} \ge 95.0\%$.
 - **MongoDB Atlas for Queue, Checkpoints & Vector Search**: Single managed failure domain in Atlas with atomic operations.
 - **DeepSeek V4 Flash Free via OpenCode Zen**: High-performance MoE model with 1M context, generous free quotas, and optimized agentic coding/reasoning capabilities ([https://opencode.ai/docs/](https://opencode.ai/docs/)).
